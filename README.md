@@ -41,13 +41,13 @@ DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=
 DB_NAME=nama_database
-PORT=5000
+PORT=3000
 
 Jalankan Server
 node server.js
 
 Server akan berjalan di:
-http://localhost:5000
+http://localhost:3000
 
 Menjalankan Frontend (React)
 Buka terminal baru, lalu masuk ke folder react:
