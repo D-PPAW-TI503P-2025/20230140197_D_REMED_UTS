@@ -10,7 +10,7 @@ Fitur Aplikasi
 - Peminjaman Buku
 
 Yang Digunakan
-- Frontend : React JS
+- Frontend : React JS (Vite)
 - Backend : Node.js + Express
 - Database : MySQL
 - Package Manager : npm
@@ -55,10 +55,10 @@ cd react
 npm install
 
 Jalankan aplikasi React:
-npm start
+npm run dev
 
 Aplikasi akan otomatis terbuka di browser:
-http://localhost:3000
+http://localhost:5137
 
 Endpoints:
 • Public:
