@@ -1,20 +1,14 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5001/api',
+  baseURL: 'http://localhost:3000/api'
 });
 
-// Add a request interceptor to include auth headers
-api.interceptors.request.use(
-    (config) => {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user) {
-            config.headers['x-user-id'] = user.id;
-            config.headers['x-user-role'] = user.role;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+api.interceptors.request.use(config => {
+  const auth = JSON.parse(localStorage.getItem('auth'));
+  if (auth?.role) config.headers['x-user-role'] = auth.role;
+  if (auth?.userId) config.headers['x-user-id'] = auth.userId;
+  return config;
+});
 
 export default api;

@@ -1,41 +1,92 @@
 import { useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
 
-const Navbar = () => {
-    const { user, logout } = useContext(AuthContext);
-    const navigate = useNavigate();
+export default function Navbar() {
+  const { auth, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
-    return (
-        <nav className="navbar">
-            <div className="navbar-brand">
-                <Link to="/">Library System</Link>
-            </div>
-            <div className="navbar-links">
-                <Link to="/">Home</Link>
+  return (
+    <nav style={navStyle}>
+      {/* Kiri */}
+      <div style={leftMenu}>
+        <Link to="/" style={logoStyle}>Peminjaman Buku</Link>
 
-                {user ? (
-                    <>
-                        {user.role === 'admin' && (
-                            <Link to="/admin">Admin Dashboard</Link>
-                        )}
-                        <span>Hello, {user.username} ({user.role})</span>
-                        <button onClick={handleLogout}>Logout</button>
-                    </>
-                ) : (
-                    <>
-                        <Link to="/login">Login</Link>
-                        <Link to="/register">Register</Link>
-                    </>
-                )}
-            </div>
-        </nav>
-    );
+        {auth?.role === 'admin' && (
+          <Link to="/admin" style={linkStyle}>Dashboard Admin</Link>
+        )}
+
+        {auth?.role === 'user' && (
+          <Link to="/user" style={linkStyle}>Dashboard User</Link>
+        )}
+      </div>
+
+      {/* Kanan */}
+      <div style={rightMenu}>
+        {!auth && (
+          <>
+            <Link to="/login" style={linkStyle}>Login</Link>
+            <Link to="/register" style={linkStyle}>Register</Link>
+          </>
+        )}
+
+        {auth && (
+          <button onClick={handleLogout} style={logoutBtn}>
+            Logout
+          </button>
+        )}
+      </div>
+    </nav>
+  );
+}
+
+/* ===== Styles ===== */
+
+const navStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '18px 32px',        // ditinggikan
+  background: '#1f2937',
+  color: '#fff'
 };
 
-export default Navbar;
+const leftMenu = {
+  display: 'flex',
+  gap: 24,
+  alignItems: 'center'
+};
+
+const rightMenu = {
+  display: 'flex',
+  gap: 20,
+  alignItems: 'center'
+};
+
+const logoStyle = {
+  color: '#fff',
+  textDecoration: 'none',
+  fontWeight: 'bold',
+  fontSize: 18
+};
+
+const linkStyle = {
+  color: '#e5e7eb',
+  textDecoration: 'none',
+  fontSize: 15
+};
+
+const logoutBtn = {
+  background: '#ef4444',
+  color: '#fff',
+  border: 'none',
+  padding: '8px 16px',
+  borderRadius: 8,
+  cursor: 'pointer',
+  fontWeight: 'bold'
+};

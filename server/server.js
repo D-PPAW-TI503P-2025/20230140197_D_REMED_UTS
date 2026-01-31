@@ -1,7 +1,11 @@
 const express = require('express');
-const app = express();
 const cors = require('cors');
 require('dotenv').config();
+
+const app = express();
+
+// ===== Tentukan PORT lebih dulu =====
+const PORT = process.env.PORT || 3000;
 
 // ===== Import Database =====
 const { sequelize } = require('./models');
@@ -12,7 +16,15 @@ const borrowRoutes = require('./routes/borrowRoutes');
 const userRoutes = require('./routes/userRoutes');
 
 // ===== Middleware Global =====
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+// kalau masih development, boleh bebaskan semua origin:
+app.use(cors());
+
+// kalau mau dibatasi ke frontend tertentu, pakai ini:
+// app.use(cors({
+//   origin: 'http://localhost:5173',
+//   credentials: true
+// }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -28,7 +40,7 @@ app.use('/api/books', bookRoutes);
 app.use('/api/borrow', borrowRoutes);
 app.use('/api/users', userRoutes);
 
-// ===== Error Handling Global (opsional tapi bagus) =====
+// ===== Error Handling Global =====
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
@@ -36,14 +48,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ===== Jalankan Server =====
-const PORT = process.env.PORT || 3000;
-
+// ===== Jalankan Server setelah DB siap =====
 sequelize.sync()
   .then(() => {
     console.log('Database connected');
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`Server running on http://localhost:${PORT}`);
     });
   })
   .catch((err) => {

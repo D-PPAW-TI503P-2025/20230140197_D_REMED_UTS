@@ -1,46 +1,62 @@
-const { Book, BorrowLog } = require('../models');
+const { Book, BorrowLog, User } = require('../models');
 
-const borrowController = {
-    borrowBook: async (req, res) => {
-        try {
-            const { bookId, latitude, longitude } = req.body;
-            const userId = req.userId; // Dari middleware
+exports.borrowBook = async (req, res) => {
+  try {
+    const { bookId, latitude, longitude } = req.body;
+    const userId = req.headers['x-user-id'];
 
-            // 1. Cek User ID
-            if (!userId) {
-                return res.status(400).json({ message: 'User ID header is missing' });
-            }
-
-            // 2. Cek Buku & Stock
-            const book = await Book.findByPk(bookId);
-            if (!book) {
-                return res.status(404).json({ message: 'Book not found' });
-            }
-            if (book.stock <= 0) {
-                return res.status(400).json({ message: 'Book is out of stock' });
-            }
-
-            // 3. Decrement Stock
-            await book.decrement('stock');
-
-            // 4. Catat Log
-            const log = await BorrowLog.create({
-                userId,
-                bookId,
-                latitude,
-                longitude,
-                borrowDate: new Date()
-            });
-
-            res.status(201).json({
-                message: 'Book borrowed successfully',
-                data: log
-            });
-
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
+    const book = await Book.findByPk(bookId);
+    if (!book) {
+      return res.status(404).json({ message: 'Buku tidak ditemukan' });
     }
+
+    if (book.stock <= 0) {
+      return res.status(400).json({ message: 'Stok buku habis' });
+    }
+
+    book.stock -= 1;
+    await book.save();
+
+    const log = await BorrowLog.create({
+      userId,
+      bookId,
+      borrowDate: new Date(),
+      latitude,
+      longitude
+    });
+
+    res.status(201).json({
+      message: 'Berhasil meminjam buku',
+      data: log
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Gagal meminjam buku' });
+  }
 };
 
-module.exports = borrowController;
+exports.getAllBorrowLogs = async (req, res) => {
+  try {
+    const logs = await BorrowLog.findAll({
+      include: [
+        {
+          model: User,
+          as: 'User',
+          attributes: ['id', 'username']
+        },
+        {
+          model: Book,
+          as: 'Book',
+          attributes: ['id', 'title']
+        }
+      ],
+      order: [['borrowDate', 'DESC']]
+    });
+
+    res.json(logs);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Gagal mengambil data peminjaman' });
+  }
+};
