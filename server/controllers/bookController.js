@@ -23,28 +23,48 @@ const bookController = {
     createBook: async (req, res) => {
         try {
             const { title, author, stock } = req.body;
+
             if (!title || !author) {
                 return res.status(400).json({ message: 'Title and Author are required' });
             }
-            const newBook = await Book.create({ title, author, stock });
-            res.status(201).json(newBook);
+
+            const newBook = await Book.create({
+                title,
+                author,
+                stock: stock ?? 0
+            });
+
+            return res.status(201).json({
+                message: 'Data berhasil ditambahkan',
+                data: newBook
+            });
+
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
     },
+
 
     updateBook: async (req, res) => {
         try {
             const { title, author, stock } = req.body;
+
             const book = await Book.findByPk(req.params.id);
-            if (!book) return res.status(404).json({ message: 'Book not found' });
+            if (!book) {
+                return res.status(404).json({ message: 'Book not found' });
+            }
 
             await book.update({ title, author, stock });
-            res.json(book);
+
+            return res.json({
+                message: 'Data berhasil diupdate',
+                data: book
+            });
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
     },
+
 
     deleteBook: async (req, res) => {
         try {
